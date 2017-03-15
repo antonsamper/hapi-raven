@@ -1,4 +1,4 @@
-#hapi-raven-boom [![Build Status](https://travis-ci.org/antonsamper/hapi-raven-boom.svg?branch=master)](https://travis-ci.org/antonsamper/hapi-raven-boom)
+# hapi-raven-boom [![Build Status](https://travis-ci.org/antonsamper/hapi-raven-boom.svg?branch=master)](https://travis-ci.org/antonsamper/hapi-raven-boom)
 A Hapi plugin for sending exceptions to Sentry.io through Raven. 
 
 This is a fork of [@bendrucker's](https://github.com/bendrucker/hapi-raven) hapi-raven package that also
