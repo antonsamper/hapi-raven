@@ -1,7 +1,4 @@
 language: node_js
 node_js:
-- '4'
-- '6'
-script:
-- npm test
-- npm run coverage
+  - "4"
+  - "6"
