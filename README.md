@@ -1,7 +1,7 @@
 hapi-raven [![Build Status](https://travis-ci.org/bendrucker/hapi-raven.svg?branch=master)](https://travis-ci.org/bendrucker/hapi-raven)
 ==========
 
-A Hapi plugin for sending exceptions to Sentry through Raven. 
+A Hapi plugin for sending exceptions to Sentry.io through Raven. 
 
 This is a fork of [@bendrucker's](https://github.com/bendrucker/hapi-raven) hapi-raven package tweaked to better adjust to Pager's requirements.
 
