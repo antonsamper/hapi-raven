@@ -1,46 +1,58 @@
 {
-  "name": "hapi-raven",
-  "version": "5.0.0",
-  "description": "A Hapi plugin for sending exceptions to Sentry through Raven",
-  "main": "index.js",
+  "name": "hapi-raven-boom",
+  "version": "0.0.0",
+  "description": "A Hapi plugin for sending exceptions to Sentry.io through Raven",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "npm run eslint && jest",
+    "eslint": "eslint ."
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bendrucker/hapi-raven.git"
-  },
-  "scripts": {
-    "test": "standard && test-peer-range hapi",
-    "test-main": "tape test.js",
-    "coverage": "100 npm run test-main"
-  },
-  "dependencies": {
-    "raven": "~1.1.1"
-  },
-  "peerDependencies": {
-    "hapi": ">=8 <17"
-  },
-  "devDependencies": {
-    "assert-100": "^1.1.0",
-    "boom": "^4.0.0",
-    "hapi": "^16.0.1",
-    "nyc": "^10.0.0",
-    "proxyquire": "^1.7.10",
-    "semver": "^5.3.0",
-    "standard": "^8.2.0",
-    "tape": "^4.6.0",
-    "test-peer-range": "^1.0.1"
+    "url": "git+https://github.com/antonsamper/hapi-raven-boom.git"
   },
   "keywords": [
     "hapi",
+    "plugin",
     "sentry",
     "raven",
-    "plugin",
     "exception",
-    "error"
+    "error",
+    "boom"
   ],
-  "author": "Ben Drucker <bvdrucker@gmail.com> (http://www.bendrucker.me/)",
-  "license": "MIT",
+  "contributors": [
+    "Anton Samper Rivaya",
+    "Ben Drucker"
+  ],
+  "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/bendrucker/hapi-raven/issues"
+    "url": "https://github.com/antonsamper/hapi-raven-boom/issues"
   },
-  "homepage": "https://github.com/bendrucker/hapi-raven"
+  "homepage": "https://github.com/antonsamper/hapi-raven-boom#readme",
+  "devDependencies": {
+    "eslint": "^3.15.0",
+    "eslint-config-hapi": "^10.0.0",
+    "eslint-plugin-hapi": "^4.0.0",
+    "hapi": "^16.1.0",
+    "jest": "^19.0.2"
+  },
+  "dependencies": {
+    "raven": "^1.1.1",
+    "hoek": "^4.1.0",
+    "boom": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  }
 }
