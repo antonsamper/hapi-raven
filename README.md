@@ -30,7 +30,7 @@ Server.register({
         settings: {
             captureUnhandledRejections: true
         },
-        tags: 'some-tag'
+        tags: ['some-tag']
     },
 }, (err) => {
 
@@ -50,8 +50,6 @@ Server.register({
 * `dsn` - [REQUIRED] - Sentry DSN for the project.
 * `settings` - [OPTIONAL] - An object with extra settings for the Sentry client. [See sentry configuration notes](https://docs.sentry.io/clients/node/config/)
 * `tags` - [OPTIONAL] - An array of tags (strings) to apply to each captured event.
-
-Note that DSN configuration using `process.env` is not supported. If you wish to replicate the [default environment variable behavior](https://github.com/getsentry/raven-node/blob/master/lib/client.js#L21), you'll need to supply the value directly:
 
 
 ## Manually using the Raven client
