@@ -46,7 +46,7 @@ Server.register({
 ```
 
 
-## Plugin Options
+## Options
 * `dsn` - [REQUIRED] - Sentry DSN for the project.
 * `settings` - [OPTIONAL] - An object with extra settings for the Sentry client. [See sentry configuration notes](https://docs.sentry.io/clients/node/config/)
 * `tags` - [OPTIONAL] - An array of tags (strings) to apply to each captured event.
