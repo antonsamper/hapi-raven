@@ -77,3 +77,8 @@ server.inject('/throw', function (response) {
   // passed error is logged to Sentry
 })
 ```
+
+-------------------------
+
+For convenience, the Raven client is exposed through `server.plugins['hapi-raven-boom'].client`.
+This will allow you to capture non Boom errors, set the context and [more](https://docs.sentry.io/clients/node/). 
