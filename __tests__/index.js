@@ -159,7 +159,7 @@ describe('plugin functionality', () => {
             options: {
                 dsn: null,
                 settings: {},
-                tags: 'testing'
+                tags: ['testing']
             }
         }, (err) => {
 
@@ -185,7 +185,7 @@ describe('plugin functionality', () => {
                         },
                         url: expect.stringMatching(/^http:\/\/.+:0\/$/)
                     },
-                    tags: 'testing'
+                    tags: ['testing']
                 }));
                 done();
             });
