@@ -1,136 +1,194 @@
-'use strict'
+/*********************************************************************************
+ 1. Mocks
+ *********************************************************************************/
 
-var test = require('tape')
-var hapi = require('hapi')
-var boom = require('boom')
-var semver = require('semver')
-var proxyquire = require('proxyquire')
+jest.mock('raven', () => {
 
-var hapiVersion = semver.major(require('hapi/package.json').version)
+    return {
+        config: jest.fn(() => {
 
-test('options', function (t) {
-    t.plan(2)
+            return {
+                install: jest.fn()
+            };
+        }),
+        captureException: jest.fn(),
+        captureMessage: jest.fn()
+    };
+});
 
-    var server = Server()
-    var plugin = proxyquire('./', {
-        raven: {
-            config: function testConfig (dsn, options) {
-                t.equal(dsn, 'dsn')
-                t.deepEqual(options, {foo: 'bar'})
+
+/*********************************************************************************
+ 2. Dependencies
+ *********************************************************************************/
+
+const RavenBoomPlugin = require('../lib');
+const Hapi = require('hapi');
+const Hoek = require('hoek');
+const Raven = require('raven');
+
+
+/*********************************************************************************
+ 3. Exports
+ *********************************************************************************/
+
+describe('registration assertions', () => {
+
+    it('should throw error when dsn is missing', () => {
+
+        const server = new Hapi.Server();
+
+        expect(() => {
+
+            server.register({
+                register: RavenBoomPlugin
+            }, Hoek.ignore);
+        }).toThrowError('Missing `dsn` property');
+    });
+});
+
+describe('plugin functionality', () => {
+
+    beforeEach(() => {
+
+        Raven.config.mockClear();
+    });
+
+    it('should expose access to the raven client', (done) => {
+
+        const server = new Hapi.Server();
+        server.connection();
+
+        server.register({
+            register: RavenBoomPlugin,
+            options: {
+                dsn: null
             }
-        }
-    })
+        }, (err) => {
 
-    register(server, plugin, {
-        dsn: 'dsn',
-        client: {foo: 'bar'}
-    })
-})
+            expect(err).toBeUndefined();
+            expect(server.plugins['hapi-raven-boom']).toBeDefined();
+            expect(server.plugins['hapi-raven-boom'].client).toBeDefined();
+            expect(server.plugins['hapi-raven-boom'].client === Raven).toBe(true);
+            done();
+        });
+    });
 
-test('request-error', function (t) {
-    t.plan(11)
+    it('should ensure the raven client is setup with the supplied settings', (done) => {
 
-    var server = Server()
-    var plugin = proxyquire('./', {
-        raven: {
-            config: function () {},
-            captureException: function testCapture (err, data) {
-                t.equal(err.message, 'unexpected')
-                t.ok(data.extra)
-                t.equal(typeof data.extra.timestamp, 'number')
-                t.equal(typeof data.extra.id, 'string')
-                t.equal(data.request.method, 'get')
+        const server = new Hapi.Server();
 
-                if (hapiVersion === 8) {
-                    t.ok(/^http:\/\/.+\/$/.test(data.request.url))
-                } else {
-                    t.ok(/^http:\/\/.+:0\/$/.test(data.request.url))
+        server.connection();
+
+        server.register({
+            register: RavenBoomPlugin,
+            options: {
+                dsn: null,
+                settings: {
+                    foo: 'bar'
                 }
-
-                t.deepEqual(data.request.query_string, {})
-                t.ok(data.request.headers['user-agent'])
-                t.deepEqual(data.request.cookies, {})
-                t.equal(data.extra.remoteAddress, hapiVersion === 8 ? '' : '127.0.0.1')
             }
-        }
-    })
+        }, (err) => {
 
-    register(server, plugin, {})
+            expect(err).toBeUndefined();
+            expect(Raven.config).toHaveBeenCalledWith(null, { foo: 'bar' });
+            done();
+        });
+    });
 
-    server.inject('/', function (response) {
-        t.equal(response.statusCode, 500)
-    })
-})
+    it('should send an exception to sentry', (done) => {
 
-test('boom error', function (t) {
-    t.plan(1)
+        const server = new Hapi.Server();
 
-    var server = Server()
-    var plugin = proxyquire('./', {
-        raven: {
-            config: function () {},
-            captureException: t.fail
-        }
-    })
+        server.connection();
 
-    register(server, plugin, {})
+        server.route({
+            method: 'GET',
+            path: '/',
+            handler: (request, reply) => {
 
-    server.inject('/boom', function (response) {
-        t.equal(response.statusCode, 403)
-    })
-})
-
-test('tags', function (t) {
-    t.plan(3)
-
-    var server = Server()
-    var plugin = proxyquire('./', {
-        raven: {
-            config: function () {},
-            captureException: function testCapture (err, data) {
-                t.ok(err)
-                t.deepEqual(data.tags, ['beep'])
+                reply(new Error('test exception'));
             }
-        }
-    })
+        });
 
-    register(server, plugin, {tags: ['beep']})
+        server.register({
+            register: RavenBoomPlugin,
+            options: {
+                dsn: null,
+                settings: {},
+                tags: 'testing'
+            }
+        }, (err) => {
 
-    server.inject('/', function (response) {
-        t.equal(response.statusCode, 500)
-    })
-})
+            expect(err).toBeUndefined();
 
-function Server () {
-    var server = new hapi.Server()
-    server.connection()
+            server.inject('/?foo=bar', (res) => {
 
-    server.route({
-        method: 'GET',
-        path: '/',
-        handler: function (request, reply) {
-            reply(new Error('unexpected'))
-        }
-    })
+                expect(res.statusCode).toEqual(500);
+                expect(Raven.captureException).toHaveBeenCalledWith(new Error('test exception'), expect.objectContaining({
+                    extra: {
+                        id: expect.any(String),
+                        remoteAddress: expect.any(String),
+                        remotePort: expect.any(String),
+                        timestamp: expect.any(Number)
+                    },
+                    level: 'error',
+                    request: {
+                        cookies: expect.any(Object),
+                        headers: expect.any(Object),
+                        method: 'get',
+                        query_string: {
+                            foo: 'bar'
+                        },
+                        url: expect.stringMatching(/^http:\/\/.+:0\/$/)
+                    },
+                    tags: 'testing'
+                }));
+                done();
+            });
+        });
+    });
 
-    server.route({
-        method: 'GET',
-        path: '/boom',
-        handler: function (request, reply) {
-            reply(boom.forbidden())
-        }
-    })
+    it('should send a message to sentry', (done) => {
 
-    return server
-}
+        const server = new Hapi.Server();
 
-function register (server, plugin, options) {
-    server.register({
-        register: plugin,
-        options: options || {
-            dsn: 'dsn'
-        }
-    }, function (err) {
-        if (err) throw err
-    })
-}
+        server.connection();
+
+        server.register({
+            register: RavenBoomPlugin,
+            options: {
+                dsn: null,
+                settings: {},
+                tags: 'testing'
+            }
+        }, (err) => {
+
+            expect(err).toBeUndefined();
+
+            server.inject('/?foo=bar', (res) => {
+
+                expect(res.statusCode).toEqual(404);
+                expect(Raven.captureMessage).toHaveBeenCalledWith('Not Found', expect.objectContaining({
+                    extra: {
+                        id: expect.any(String),
+                        remoteAddress: expect.any(String),
+                        remotePort: expect.any(String),
+                        timestamp: expect.any(Number)
+                    },
+                    level: 'info',
+                    request: {
+                        cookies: expect.any(Object),
+                        headers: expect.any(Object),
+                        method: 'get',
+                        query_string: {
+                            foo: 'bar'
+                        },
+                        url: expect.stringMatching(/^http:\/\/.+:0\/$/)
+                    },
+                    tags: 'testing'
+                }));
+                done();
+            });
+        });
+    });
+});
