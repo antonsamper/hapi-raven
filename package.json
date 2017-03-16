@@ -4,7 +4,7 @@
   "description": "A Hapi plugin for sending exceptions to Sentry.io through Raven",
   "main": "lib/index.js",
   "scripts": {
-    "test": "npm run eslint && jest",
+    "test": "npm run eslint && jest --runInBand",
     "eslint": "eslint ."
   },
   "repository": {
