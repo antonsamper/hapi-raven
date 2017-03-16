@@ -10,7 +10,7 @@ The plugin is written in ES2016, please use **Node.js v4 or later**.
 
 
 ## Installation
-Add `hapi-cron` as a dependency to your project:
+Add `hapi-raven-boom` as a dependency to your project:
 
 ```bash
 $ npm i -S hapi-raven-boom
