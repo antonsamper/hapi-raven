@@ -127,7 +127,6 @@ describe('plugin functionality', () => {
                 expect(Raven.captureException).toHaveBeenCalledWith(new Error('test exception'), expect.objectContaining({
                     extra: {
                         id: expect.any(String),
-                        remoteAddress: expect.any(String),
                         remotePort: expect.any(String),
                         timestamp: expect.any(Number)
                     },
@@ -171,7 +170,6 @@ describe('plugin functionality', () => {
                 expect(Raven.captureMessage).toHaveBeenCalledWith('Not Found', expect.objectContaining({
                     extra: {
                         id: expect.any(String),
-                        remoteAddress: expect.any(String),
                         remotePort: expect.any(String),
                         timestamp: expect.any(Number)
                     },
