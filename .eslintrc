@@ -2,5 +2,8 @@
     "extends": "hapi",
     "parserOptions": {
         "sourceType": "module"
+    },
+    "env": {
+         "jest": true
     }
 }
